@@ -1,7 +1,5 @@
 ## Description
 
-This project creates a CLI tool (`lend`) that allows the user to easily track how much money they owe others.
-
 Lender allows you to easily record the amount of money that changes hands among friends.
 Not everyone has the ability to make an immediate reimbursement, and sometimes money changes hands so frequently that it's simply not worth it to constantly make bank transfers.
 
