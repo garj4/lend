@@ -1,0 +1,20 @@
+# Golang CircleCI 2.0 configuration file
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang
+
+    working_directory: /go/src/github.com/garj4/lend
+
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: |
+            go get -u \
+            github.com/golangci/golangci-lint/cmd/golangci-lint \
+            github.com/stretchr/testify \
+            github.com/spf13/cobra/cobra
+      - run: make lint
+      - run: make test
