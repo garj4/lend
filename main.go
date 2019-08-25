@@ -15,7 +15,10 @@ limitations under the License.
 */
 package main
 
-import "github.com/garj4/lend/cmd"
+import (
+	"github.com/garj4/lend/cmd"
+	_ "github.com/mattn/go-sqlite3"
+)
 
 func main() {
 	cmd.Execute()
