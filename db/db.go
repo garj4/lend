@@ -55,17 +55,30 @@ func (db *Database) initialize() error {
 
 // AddRecord adds a new record into the database
 func AddRecord(event, firstName string, amount float64) error {
-	database.initialize()
+	err := database.initialize()
+	if err != nil {
+		return err
+	}
 
-	statement, _ := database.dbDriver.Prepare("INSERT INTO transactions (event, amount) VALUES (?, ?)")
-	statement.Exec(event, fmt.Sprintf("%f", amount))
+	statement, err := database.dbDriver.Prepare("INSERT INTO transactions (event, amount) VALUES (?, ?)")
+	if err != nil {
+		return err
+	}
+
+	_, err = statement.Exec(event, fmt.Sprintf("%f", amount))
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
 // GetRecords returns the rows in the transactions table
 func GetRecords() (*sql.Rows, error) {
-	database.initialize()
+	err := database.initialize()
+	if err != nil {
+		return nil, err
+	}
 
 	rows, err := database.dbDriver.Query("SELECT id, event, amount FROM transactions")
 	if err != nil {

@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/garj4/lend/db"
 
 	"github.com/spf13/cobra"
@@ -13,7 +15,10 @@ var toCmd = &cobra.Command{
 	Long: `This command takes two arguments: a person's name and an amount.
   For example, "lend to Garrett 5" would record that $5 have been lent to Garrett`,
 	Run: func(cmd *cobra.Command, args []string) {
-		db.AddRecord("event", "name", -1.0)
+		err := db.AddRecord("event", "name", -1.0)
+		if err != nil {
+			fmt.Printf("Failed to add record: %s", err)
+		}
 	},
 }
 

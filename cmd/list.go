@@ -23,7 +23,11 @@ var listCmd = &cobra.Command{
 		var event string
 		var amount float64
 		for rows.Next() {
-			rows.Scan(&id, &event, &amount)
+			err := rows.Scan(&id, &event, &amount)
+			if err != nil {
+				fmt.Printf("Error when reading rows from DB: %s", err)
+				os.Exit(1)
+			}
 			fmt.Println(strconv.Itoa(id) + ": " + event + ": " + fmt.Sprintf("%f", amount))
 		}
 	},
