@@ -1,9 +1,7 @@
 package cmd
 
 import (
-	"database/sql"
-	"os"
-	"path"
+	"github.com/garj4/lend/db"
 
 	"github.com/spf13/cobra"
 )
@@ -15,13 +13,7 @@ var toCmd = &cobra.Command{
 	Long: `This command takes two arguments: a person's name and an amount.
   For example, "lend to Garrett 5" would record that $5 have been lent to Garrett`,
 	Run: func(cmd *cobra.Command, args []string) {
-		database, err := sql.Open("sqlite3", path.Join(configDir, "sqlite.db"))
-		if err != nil {
-			os.Exit(1)
-		}
-
-		statement, _ := database.Prepare("INSERT INTO people (firstname, lastname, amount) VALUES (?, ?, ?)")
-		statement.Exec("Sample", "Person", "5.0")
+		db.AddRecord("event", "name", -1.0)
 	},
 }
 

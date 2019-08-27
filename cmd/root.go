@@ -5,12 +5,12 @@ import (
 	"os"
 	"path"
 
+	"github.com/garj4/lend/helpers"
+
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
-
-var configDir string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -42,9 +42,9 @@ func initConfig() {
 		os.Exit(1)
 	}
 
-	configDir = path.Join(home, ".lend")
+	helpers.ConfigDir = path.Join(home, ".lend")
 
-	viper.AddConfigPath(configDir)
+	viper.AddConfigPath(helpers.ConfigDir)
 	viper.SetConfigName("config")
 
 	viper.AutomaticEnv() // read in environment variables that match
