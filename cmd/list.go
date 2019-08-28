@@ -19,16 +19,16 @@ var listCmd = &cobra.Command{
 			fmt.Printf("Error when reading rows from DB: %s", err)
 			os.Exit(1)
 		}
-		var id int
-		var event string
+		var id, person int
+		var event, date string
 		var amount float64
 		for rows.Next() {
-			err := rows.Scan(&id, &event, &amount)
+			err := rows.Scan(&id, &event, &amount, &date, &person)
 			if err != nil {
 				fmt.Printf("Error when reading rows from DB: %s", err)
 				os.Exit(1)
 			}
-			fmt.Println(strconv.Itoa(id) + ": " + event + ": " + fmt.Sprintf("%f", amount))
+			fmt.Println(strconv.Itoa(id) + ": " + event + " on date: " + date + " from " + strconv.Itoa(person) + ": " + fmt.Sprintf("%f", amount))
 		}
 	},
 }

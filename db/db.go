@@ -2,8 +2,11 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"path"
+	"strconv"
+	"time"
 
 	"github.com/garj4/lend/helpers"
 )
@@ -41,8 +44,7 @@ func (db *Database) initialize() error {
 	}
 
 	// Create table for transactions
-	// TODO: Reference a person from people table as an attribute
-	statement, _ = db.dbDriver.Prepare("CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY, event TEXT, amount FLOAT, date DATETIME)")
+	statement, _ = db.dbDriver.Prepare("CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY, event TEXT, amount FLOAT, date DATETIME, person INTEGER)")
 	_, err = statement.Exec()
 	if err != nil {
 		return err
@@ -53,19 +55,70 @@ func (db *Database) initialize() error {
 	return nil
 }
 
-// AddRecord adds a new record into the database
-func AddRecord(event, firstName string, amount float64) error {
+func (db *Database) getPerson(firstName string) (int, error) {
+	personID := -1
+
+	query := fmt.Sprintf("SELECT id FROM people WHERE firstname = \"%s\"", firstName)
+
+	rows, err := database.dbDriver.Query(query)
+	defer rows.Close()
+	if err != nil {
+		return personID, err
+	}
+
+	if rows.Next() {
+		err := rows.Scan(&personID)
+		return personID, err
+	}
+
+	// No one found
+	return personID, errors.New("that person has not yet been added to the database. Use `lend add-person <first name> <last name>` to add them")
+}
+
+// AddPerson adds a new person to the database, if they don't already exist
+func AddPerson(firstName, lastName string) error {
 	err := database.initialize()
 	if err != nil {
 		return err
 	}
 
-	statement, err := database.dbDriver.Prepare("INSERT INTO transactions (event, amount) VALUES (?, ?)")
+	// Check if the person already exists
+	personID, err := database.getPerson(firstName)
+	if personID > 0 || err == nil {
+		return errors.New("someone with that firstname has already been added to the database")
+	}
+
+	statement, err := database.dbDriver.Prepare("INSERT INTO people (firstname, lastname) VALUES (?, ?)")
 	if err != nil {
 		return err
 	}
 
-	_, err = statement.Exec(event, fmt.Sprintf("%f", amount))
+	_, err = statement.Exec(firstName, lastName)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// AddTransaction adds a new transaction into the database
+func AddTransaction(event, firstName string, amount float64) error {
+	err := database.initialize()
+	if err != nil {
+		return err
+	}
+
+	personID, err := database.getPerson(firstName)
+	if err != nil {
+		return err
+	}
+
+	statement, err := database.dbDriver.Prepare("INSERT INTO transactions (event, amount, date, person) VALUES (?, ?, ?, ?)")
+	if err != nil {
+		return err
+	}
+
+	_, err = statement.Exec(event, fmt.Sprintf("%f", amount), time.Now().Format("2006-01-02 15:04:05"), strconv.Itoa(personID))
 	if err != nil {
 		return err
 	}
@@ -80,7 +133,7 @@ func GetRecords() (*sql.Rows, error) {
 		return nil, err
 	}
 
-	rows, err := database.dbDriver.Query("SELECT id, event, amount FROM transactions")
+	rows, err := database.dbDriver.Query("SELECT id, event, amount, date, person FROM transactions")
 	if err != nil {
 		return nil, err
 	}
