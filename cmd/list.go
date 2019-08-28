@@ -12,7 +12,7 @@ import (
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "Lists the amount each person owes in the terminal.",
+	Short: "Lists the transactions.",
 	Run: func(cmd *cobra.Command, args []string) {
 		rows, err := db.GetRecords()
 		if err != nil {

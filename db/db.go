@@ -61,10 +61,10 @@ func (db *Database) getPerson(firstName string) (int, error) {
 	query := fmt.Sprintf("SELECT id FROM people WHERE firstname = \"%s\"", firstName)
 
 	rows, err := database.dbDriver.Query(query)
-	defer rows.Close()
 	if err != nil {
 		return personID, err
 	}
+	defer rows.Close()
 
 	if rows.Next() {
 		err := rows.Scan(&personID)
@@ -137,7 +137,35 @@ func GetRecords() (*sql.Rows, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return rows, nil
+}
+
+// GetAmountOwed returns the amount a single person owes
+func GetAmountOwed(name string) (float64, error) {
+	err := database.initialize()
+	if err != nil {
+		return 0, err
+	}
+
+	personID, err := database.getPerson(name)
+	if err != nil {
+		return 0, err
+	}
+
+	rows, err := database.dbDriver.Query(fmt.Sprintf("SELECT SUM(amount) FROM transactions WHERE person = %d", personID))
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+
+	sum := 0.0
+	if rows.Next() {
+		err := rows.Scan(&sum)
+		return sum, err
+	}
+
+	return 0, errors.New("error summing amount owed")
 }
 
 // TODO: Format package for JSON vs. terminal formatting
