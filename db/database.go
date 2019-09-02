@@ -14,6 +14,7 @@ type Database struct {
 	dbDriver *sql.DB
 }
 
+// A package global database representation
 var database Database
 
 func (db *Database) initialize() error {
@@ -62,8 +63,34 @@ func (db *Database) createTables() error {
 	return nil
 }
 
+// Wrap the `Query()` and `Exec()` functions so we can handle an automatic custom initialization
+// Additionally, nothing outside this file should need to directly access the struct attributes
+
+func (db *Database) query(query string, args ...interface{}) (*sql.Rows, error) {
+	err := db.initialize()
+	if err != nil {
+		return nil, err
+	}
+
+	return db.dbDriver.Query(query, args...)
+}
+
+func (db *Database) exec(query string, args ...interface{}) (sql.Result, error) {
+	err := db.initialize()
+	if err != nil {
+		return nil, err
+	}
+
+	return db.dbDriver.Exec(query, args...)
+}
+
 func (db *Database) getPerson(firstName string) (int, error) {
 	personID := -1
+
+	err := db.initialize()
+	if err != nil {
+		return personID, err
+	}
 
 	rows, err := database.dbDriver.Query(selectPersonQuery, firstName)
 	if err != nil {
