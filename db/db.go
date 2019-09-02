@@ -3,6 +3,8 @@ package db
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+	"io"
 	"path"
 	"strconv"
 	"time"
@@ -127,19 +129,57 @@ func AddTransaction(event, firstName string, amount float64) error {
 	return nil
 }
 
-// GetRecords returns the rows in the transactions table
-func GetRecords() (*sql.Rows, error) {
+// PrintTransactions prints the transactions table to the provided io.Writer
+func PrintTransactions(w io.Writer) error {
 	err := database.initialize()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	rows, err := database.dbDriver.Query(selectAllTransactionsQuery)
 	if err != nil {
-		return nil, err
+		return err
+	}
+	defer rows.Close()
+
+	var id, person int
+	var event, date string
+	var amount float64
+	for rows.Next() {
+		err := rows.Scan(&id, &event, &amount, &date, &person)
+		if err != nil {
+			return fmt.Errorf("error when reading rows from DB: %s", err)
+		}
+		fmt.Fprintf(w, "%d: %s on date %s from personId %d for amount %.2f\n", id, event, date, person, amount)
 	}
 
-	return rows, nil
+	return nil
+}
+
+// PrintPeople prints the people table to the provided io.Writer
+func PrintPeople(w io.Writer) error {
+	err := database.initialize()
+	if err != nil {
+		return err
+	}
+
+	rows, err := database.dbDriver.Query(selectAllPeopleQuery)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	var id int
+	var firstName, lastName string
+	for rows.Next() {
+		err := rows.Scan(&id, &firstName, &lastName)
+		if err != nil {
+			return fmt.Errorf("error when reading rows from DB: %s", err)
+		}
+		fmt.Fprintf(w, "%d: %s %s\n", id, firstName, lastName)
+	}
+
+	return nil
 }
 
 // GetAmountOwed returns the amount a single person owes

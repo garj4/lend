@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// addPersonCmd represents the to command
+// addPersonCmd represents the addPerson command
 var addPersonCmd = &cobra.Command{
 	Use:   "addPerson",
 	Short: "Adds a new person to the database",

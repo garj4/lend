@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strconv"
 
 	"github.com/garj4/lend/db"
 	"github.com/spf13/cobra"
@@ -14,25 +13,26 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "Lists the transactions.",
 	Run: func(cmd *cobra.Command, args []string) {
-		rows, err := db.GetRecords()
+		peopleFlag, err := cmd.Flags().GetBool("people")
 		if err != nil {
-			fmt.Printf("Error when reading rows from DB: %s", err)
+			fmt.Println(err)
 			os.Exit(1)
 		}
-		var id, person int
-		var event, date string
-		var amount float64
-		for rows.Next() {
-			err := rows.Scan(&id, &event, &amount, &date, &person)
-			if err != nil {
-				fmt.Printf("Error when reading rows from DB: %s", err)
-				os.Exit(1)
-			}
-			fmt.Println(strconv.Itoa(id) + ": " + event + " on date: " + date + " from " + strconv.Itoa(person) + ": " + fmt.Sprintf("%f", amount))
+
+		if peopleFlag {
+			err = db.PrintPeople(os.Stdout)
+		} else {
+			err = db.PrintTransactions(os.Stdout)
+		}
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
 		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(listCmd)
+
+	listCmd.Flags().BoolP("people", "p", false, "List people instead of transactions")
 }
