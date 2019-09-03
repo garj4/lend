@@ -10,4 +10,4 @@ const selectAllTransactionsQuery = `SELECT * FROM transactions`
 const selectAllPeopleQuery = `SELECT * FROM people`
 
 const selectPersonQuery = `SELECT id FROM people WHERE firstname = ?`
-const sumTransactionsQuery = `SELECT SUM(amount) FROM transactions WHERE person = ?`
+const sumTransactionsQuery = `SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE person = ?`

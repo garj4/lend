@@ -23,7 +23,7 @@ var totalCmd = &cobra.Command{
 			fmt.Printf("%s\n", err)
 		}
 
-		fmt.Printf("%f\n", amountOwed)
+		fmt.Printf("%.2f\n", amountOwed)
 	},
 }
 
