@@ -24,6 +24,7 @@ var listCmd = &cobra.Command{
 		} else {
 			err = db.PrintTransactions(os.Stdout)
 		}
+
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
